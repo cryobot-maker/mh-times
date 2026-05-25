@@ -2,26 +2,201 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+html {
+  touch-action: manipulation;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --color-bg: #ffffff;
+  --color-bg-primary: #f4f3ee;
+  --color-text: #121212;
+  --color-nav-bg: #ffffff;
+  --color-border: #e2e2e2;
+  --color-tile-border-empty: #d3d6da;
+  --color-tile-border-filled: #878a8c;
+  --wordle-green: #6aaa64;
+  --wordle-yellow: #c9b458;
+  --wordle-gray: #787c7e;
+  --connections-yellow: #f9df6d;
+  --connections-green: #a0c35a;
+  --connections-blue: #b4d8fb;
+  --connections-purple: #ba81c5;
+  --spelling-bee-yellow: #f7da21;
+  --strands-theme-blue: #a8d8ea;
+  --strands-spangram-yellow: #f6d155;
+  --font-karnak: 'nyt-karnakcondensed', 'cheltenham', Georgia, serif;
+  --font-franklin: 'nyt-franklin', 'franklin-gothic-medium', Arial, sans-serif;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-franklin);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.scroll-touch {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Wordle — fit 6 rows + keyboard on iPhone 14 (375×812) */
+.wordle-game-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+}
+
+.wordle-board-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wordle-tile-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.wordle-tile-row {
+  display: flex;
+  gap: 4px;
+}
+
+.wordle-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-width: 2px;
+  font-weight: 700;
+  text-transform: uppercase;
+  touch-action: manipulation;
+  width: var(--wordle-tile-size, 52px);
+  height: var(--wordle-tile-size, 52px);
+  font-size: var(--wordle-tile-font, 28px);
+}
+
+@media (max-width: 767px) {
+  :root {
+    --wordle-tile-size: 44px;
+    --wordle-tile-font: 22px;
+  }
+}
+
+@media (max-width: 390px) {
+  :root {
+    --wordle-tile-size: 40px;
+    --wordle-tile-font: 20px;
+  }
+}
+
+.wordle-keyboard {
+  flex-shrink: 0;
+  width: calc(100vw - 8px);
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  touch-action: manipulation;
+}
+
+.wordle-keyboard-row {
+  display: flex;
+  width: 100%;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.wordle-keyboard-row:last-child {
+  margin-bottom: 0;
+}
+
+.wordle-key {
+  flex: 1 1 0;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 12px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.wordle-key-wide {
+  flex: 1.5 1 0;
+}
+
+html.dark body {
+  background-color: #121212;
+  color: #ffffff;
+}
+
+@keyframes spelling-bee-blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.animate-spelling-bee-blink {
+  animation: spelling-bee-blink 1s step-end infinite;
+}
+
+@keyframes spelling-bee-confetti {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+.animate-spelling-bee-confetti {
+  animation: spelling-bee-confetti ease-out forwards;
+}
+
+@keyframes strands-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
+  }
+}
+
+@keyframes strands-ripple {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(168, 216, 234, 0.6);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 8px rgba(168, 216, 234, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(168, 216, 234, 0);
   }
 }
