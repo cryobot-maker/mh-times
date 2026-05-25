@@ -1,39 +1,64 @@
 import type { WordleLetterStatus } from "@/types";
 
-const STANDARD: Record<WordleLetterStatus, string> = {
-  correct: "bg-[#6aaa64] border-[#6aaa64] text-white",
-  present: "bg-[#c9b458] border-[#c9b458] text-white",
-  absent: "bg-[#787c7e] border-[#787c7e] text-white",
+export type WordleTileState = WordleLetterStatus | "empty" | "filled";
+
+const TILE_STANDARD: Record<WordleLetterStatus, string> = {
+  correct: "wl-tile-correct",
+  present: "wl-tile-present",
+  absent: "wl-tile-absent",
 };
 
-const COLOR_BLIND: Record<WordleLetterStatus, string> = {
-  correct: "bg-[#f5793a] border-[#f5793a] text-white",
-  present: "bg-[#85c0f9] border-[#85c0f9] text-white",
-  absent: "bg-[#787c7e] border-[#787c7e] text-white",
+const TILE_COLOR_BLIND: Record<WordleLetterStatus, string> = {
+  correct: "wl-tile-correct-cb",
+  present: "wl-tile-present-cb",
+  absent: "wl-tile-absent-cb",
 };
 
-const STANDARD_BG: Record<WordleLetterStatus, string> = {
-  correct: "bg-[#6aaa64] text-white",
-  present: "bg-[#c9b458] text-white",
-  absent: "bg-[#787c7e] text-white",
+const BTN_STANDARD: Record<WordleLetterStatus, string> = {
+  correct: "wl-btn-correct",
+  present: "wl-btn-present",
+  absent: "wl-btn-absent",
 };
 
-const COLOR_BLIND_BG: Record<WordleLetterStatus, string> = {
-  correct: "bg-[#f5793a] text-white",
-  present: "bg-[#85c0f9] text-white",
-  absent: "bg-[#787c7e] text-white",
+const BTN_COLOR_BLIND: Record<WordleLetterStatus, string> = {
+  correct: "wl-btn-correct-cb",
+  present: "wl-btn-present-cb",
+  absent: "wl-btn-absent-cb",
 };
 
+export function getWordleTileClass(
+  colorBlindMode: boolean,
+  status: WordleTileState
+): string {
+  if (status === "empty") return "wl-tile-empty";
+  if (status === "filled") return "wl-tile-filled";
+  const map = colorBlindMode ? TILE_COLOR_BLIND : TILE_STANDARD;
+  return map[status];
+}
+
+export function getWordleKeyboardClass(
+  colorBlindMode: boolean,
+  status?: WordleLetterStatus
+): string {
+  if (!status) return "wl-btn-default";
+  const map = colorBlindMode ? BTN_COLOR_BLIND : BTN_STANDARD;
+  return map[status];
+}
+
+/** @deprecated Use getWordleTileClass */
 export function getWordleTileStyles(
   colorBlindMode: boolean
 ): Record<WordleLetterStatus, string> {
-  return colorBlindMode ? COLOR_BLIND : STANDARD;
+  const map = colorBlindMode ? TILE_COLOR_BLIND : TILE_STANDARD;
+  return map;
 }
 
+/** @deprecated Use getWordleKeyboardClass */
 export function getWordleKeyboardStyles(
   colorBlindMode: boolean
 ): Record<WordleLetterStatus, string> {
-  return colorBlindMode ? COLOR_BLIND_BG : STANDARD_BG;
+  const map = colorBlindMode ? BTN_COLOR_BLIND : BTN_STANDARD;
+  return map;
 }
 
 export const WORDLE_SHARE_GREEN = "#6aaa64";

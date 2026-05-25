@@ -1,7 +1,7 @@
 "use client";
 
 import type { WordleLetterStatus } from "@/types";
-import { getWordleKeyboardStyles } from "@/lib/wordleColors";
+import { getWordleKeyboardClass } from "@/lib/wordleColors";
 import { useSettingsStore } from "@/lib/stores/settingsStore";
 import { cn } from "@/lib/utils";
 
@@ -23,43 +23,39 @@ export function WordleKeyboard({
   disabled,
 }: WordleKeyboardProps) {
   const colorBlindMode = useSettingsStore((s) => s.colorBlindMode);
-  const keyStatusBg = getWordleKeyboardStyles(colorBlindMode);
 
   return (
     <div className="wordle-keyboard pb-safe">
       {ROWS.map((row, rowIdx) => (
         <div key={rowIdx} className="wordle-keyboard-row">
-          {row.map((key) => {
-            const isWide = key === "ENTER" || key === "BACK";
-            const status = keyboardStatus[key];
-            const bg = status
-              ? keyStatusBg[status]
-              : "bg-[#d3d6da] text-[#121212]";
+          {row.map((keyLabel) => {
+            const isWide = keyLabel === "ENTER" || keyLabel === "BACK";
+            const status = keyboardStatus[keyLabel];
+            const label = keyLabel === "BACK" ? "⌫" : keyLabel;
 
             return (
               <button
-                key={key}
+                key={`${rowIdx}-${keyLabel}`}
                 type="button"
                 disabled={disabled}
                 onClick={() =>
                   onKey(
-                    key === "BACK"
+                    keyLabel === "BACK"
                       ? "Backspace"
-                      : key === "ENTER"
+                      : keyLabel === "ENTER"
                         ? "Enter"
-                        : key
+                        : keyLabel
                   )
                 }
                 className={cn(
-                  "wordle-key",
-                  isWide && "wordle-key-wide",
-                  bg,
+                  "wl-btn",
+                  isWide && "wl-btn-wide",
+                  getWordleKeyboardClass(colorBlindMode, status),
                   "hover:brightness-90 active:brightness-90",
                   disabled && "pointer-events-none opacity-60"
                 )}
-                style={{ fontFamily: "Arial, sans-serif" }}
               >
-                {key === "BACK" ? "⌫" : key}
+                <span className="wl-btn-label">{label}</span>
               </button>
             );
           })}
