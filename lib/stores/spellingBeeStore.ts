@@ -1,11 +1,12 @@
 import { create } from "zustand";
 import { getTodayString, loadGameState, saveGameState } from "@/lib/gameUtils";
 import {
-  calculateMaxScore,
+  calculateMaxScoreFromWords,
   getRankLabel,
   SUBMIT_ERROR_MESSAGES,
   validateSubmission,
 } from "@/lib/spellingBeeLogic";
+import { getValidWordsForPuzzle } from "@/lib/spellingBeeDictionary";
 import {
   type SpellingBeePuzzle,
 } from "@/lib/spellingBeeData";
@@ -39,8 +40,9 @@ interface SpellingBeeStore {
   lastRank: string;
   shuffleSpin: boolean;
   initialized: boolean;
+  validWordSet: Set<string> | null;
 
-  init: (dateStr: string, puzzleData?: Record<string, unknown>) => void;
+  init: (dateStr: string, puzzleData?: Record<string, unknown>) => Promise<void>;
   addLetter: (letter: string) => void;
   removeLetter: () => void;
   shuffle: () => void;
@@ -93,10 +95,15 @@ export const useSpellingBeeStore = create<SpellingBeeStore>((set, get) => ({
   lastRank: "Beginner",
   shuffleSpin: false,
   initialized: false,
+  validWordSet: null,
 
-  init: (dateStr, puzzleData) => {
+  init: async (dateStr, puzzleData) => {
     const puzzle = resolveSpellingBeePuzzle(dateStr, puzzleData);
-    const maxScore = calculateMaxScore(puzzle);
+    const validWordSet = await getValidWordsForPuzzle(puzzle);
+    const maxScore = calculateMaxScoreFromWords(
+      validWordSet,
+      puzzle.pangrams
+    );
     const saved = loadGameState<PersistedState>(storageKey(dateStr));
 
     if (saved) {
@@ -110,6 +117,7 @@ export const useSpellingBeeStore = create<SpellingBeeStore>((set, get) => ({
         score: saved.score,
         maxScore: saved.maxScore ?? maxScore,
         lastRank: rank,
+        validWordSet,
         initialized: true,
       });
       return;
@@ -124,6 +132,7 @@ export const useSpellingBeeStore = create<SpellingBeeStore>((set, get) => ({
       score: 0,
       maxScore,
       lastRank: "Beginner",
+      validWordSet,
       initialized: true,
     });
   },
@@ -159,10 +168,13 @@ export const useSpellingBeeStore = create<SpellingBeeStore>((set, get) => ({
     const state = get();
     if (!state.puzzle) return;
 
+    if (!state.validWordSet) return;
+
     const result = validateSubmission(
       state.currentWord,
       state.puzzle,
-      state.foundWords
+      state.foundWords,
+      state.validWordSet
     );
 
     if (!result.ok) {

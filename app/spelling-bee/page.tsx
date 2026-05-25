@@ -43,7 +43,7 @@ function SpellingBeeContent() {
 
   useEffect(() => {
     if (loading) return;
-    init(puzzleDate, puzzleData);
+    void init(puzzleDate, puzzleData);
   }, [init, puzzleDate, puzzleData, loading]);
 
   const handleKey = useCallback(

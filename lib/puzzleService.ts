@@ -24,6 +24,7 @@ import {
   type StrandsPuzzle,
 } from "./strandsData";
 import { WORDLE_ANSWERS, getWordleAnswer } from "./wordleData";
+import { TILES_PUZZLES, getTilesPuzzle, type TilesPuzzle } from "./tilesData";
 import { getDaysSinceJan12025, getTodayString } from "./gameUtils";
 import { createClient, isSupabaseConfigured } from "./supabase";
 import type { DailyPuzzle, PuzzleGameSlug } from "@/types";
@@ -37,6 +38,7 @@ export const PUZZLE_GAME_SLUGS: PuzzleGameSlug[] = [
   "strands",
   "letter-boxed",
   "mini",
+  "tiles",
 ];
 
 interface DailyPuzzleRow {
@@ -100,6 +102,11 @@ function getLocalMiniPuzzle(dateStr: string): MiniCrossword {
   return { ...rotated, date: dateStr };
 }
 
+function getLocalTilesPuzzle(dateStr: string): TilesPuzzle {
+  const rotated = pickByRotation(TILES_PUZZLES, dateStr);
+  return { ...rotated, date: dateStr };
+}
+
 export function getLocalPuzzleData(
   game: string,
   dateStr: string
@@ -126,6 +133,8 @@ export function getLocalPuzzleData(
       >;
     case "mini":
       return getLocalMiniPuzzle(dateStr) as unknown as Record<string, unknown>;
+    case "tiles":
+      return getLocalTilesPuzzle(dateStr) as unknown as Record<string, unknown>;
     default:
       return {};
   }
@@ -282,6 +291,16 @@ export function resolveMiniPuzzle(
     return puzzleData as unknown as MiniCrossword;
   }
   return getMiniCrossword(dateStr);
+}
+
+export function resolveTilesPuzzle(
+  dateStr: string,
+  puzzleData?: Record<string, unknown>
+): TilesPuzzle {
+  if (puzzleData && Array.isArray(puzzleData.pairs)) {
+    return puzzleData as unknown as TilesPuzzle;
+  }
+  return getTilesPuzzle(dateStr);
 }
 
 export { ROTATION_START };

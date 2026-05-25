@@ -64,7 +64,7 @@ function StrandsContent() {
     endDrag,
     clearPath,
     submitPath,
-    useHint,
+    applyHint,
     setShowStats,
     showToast,
     getHintsAvailable,
@@ -129,7 +129,7 @@ function StrandsContent() {
           {hintsAvailable > 0 && gameStatus === "playing" && (
             <button
               type="button"
-              onClick={useHint}
+              onClick={applyHint}
               className="rounded-full border border-[#121212] px-3 py-1.5 text-sm font-semibold hover:bg-[#f4f3ee]"
             >
               Use Hint
@@ -168,6 +168,13 @@ function StrandsContent() {
             )}
           </AnimatePresence>
         </div>
+
+        {gameStatus === "playing" && (
+          <p className="mt-3 text-center text-xs text-[#6b6b6b]">
+            Drag through letters to spell a word, then release or tap Submit.
+            Find the spangram and all theme words.
+          </p>
+        )}
 
         <div className="relative mt-6 flex justify-center">
           <StrandsGrid

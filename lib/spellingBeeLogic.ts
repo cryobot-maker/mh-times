@@ -1,5 +1,4 @@
 import type { SpellingBeePuzzle } from "./spellingBeeData";
-import { getUniqueValidWords } from "./spellingBeeData";
 
 export const RANK_THRESHOLDS = [
   { pct: 0, label: "Beginner" },
@@ -24,11 +23,13 @@ export function scoreWord(word: string, isPangram: boolean): number {
   return points;
 }
 
-export function calculateMaxScore(puzzle: SpellingBeePuzzle): number {
-  const unique = getUniqueValidWords(puzzle);
-  const pangramSet = new Set(puzzle.pangrams.map((p) => p.toUpperCase()));
+export function calculateMaxScoreFromWords(
+  words: Set<string>,
+  pangrams: string[]
+): number {
+  const pangramSet = new Set(pangrams.map((p) => p.toUpperCase()));
   let total = 0;
-  unique.forEach((word) => {
+  words.forEach((word) => {
     total += scoreWord(word, pangramSet.has(word));
   });
   return total;
@@ -79,7 +80,8 @@ export type SubmitResult =
 export function validateSubmission(
   word: string,
   puzzle: SpellingBeePuzzle,
-  foundWords: string[]
+  foundWords: string[],
+  validSet: Set<string>
 ): SubmitResult {
   const upper = word.toUpperCase().trim();
   if (upper.length < 4) return { ok: false, error: "too-short" };
@@ -87,7 +89,6 @@ export function validateSubmission(
     return { ok: false, error: "missing-center" };
   if (!canUseLetters(upper, puzzle.centerLetter, [...puzzle.outerLetters]))
     return { ok: false, error: "invalid-letters" };
-  const validSet = getUniqueValidWords(puzzle);
   if (!validSet.has(upper)) return { ok: false, error: "not-in-list" };
   if (foundWords.map((w) => w.toUpperCase()).includes(upper))
     return { ok: false, error: "already-found" };

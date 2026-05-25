@@ -304,3 +304,356 @@ html.dark body {
     box-shadow: 0 0 0 0 rgba(168, 216, 234, 0);
   }
 }
+
+/* Sudoku */
+.sudoku-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  width: 100%;
+  max-width: 504px;
+  aspect-ratio: 1;
+  border: 2px solid #344861;
+  box-sizing: border-box;
+  touch-action: manipulation;
+}
+
+@media (max-width: 767px) {
+  .sudoku-grid {
+    width: calc(100vw - 32px);
+    max-width: calc(100vw - 32px);
+  }
+}
+
+.sudoku-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  border: 1px solid #c2c2c2;
+  background-color: #ffffff;
+  padding: 0;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+.sudoku-cell:disabled {
+  cursor: default;
+}
+
+.sudoku-cell-box-right {
+  border-right-width: 2px;
+  border-right-color: #344861;
+}
+
+.sudoku-cell-box-bottom {
+  border-bottom-width: 2px;
+  border-bottom-color: #344861;
+}
+
+.sudoku-cell-default {
+  background-color: #ffffff;
+}
+
+.sudoku-cell-selected {
+  background-color: #bbdefb !important;
+}
+
+.sudoku-cell-highlighted {
+  background-color: #e8f4fd !important;
+}
+
+.sudoku-cell-same-number {
+  background-color: #c8e6fa !important;
+}
+
+.sudoku-cell-conflict {
+  background-color: #f8d7da !important;
+  color: #c0392b;
+}
+
+.sudoku-cell-hint {
+  background-color: #fffde7 !important;
+}
+
+.sudoku-cell-given .sudoku-cell-value {
+  font-weight: 700;
+}
+
+.sudoku-cell-user .sudoku-cell-value {
+  font-weight: 400;
+}
+
+.sudoku-cell-value {
+  font-size: clamp(14px, 4.5vw, 22px);
+  color: #344861;
+  line-height: 1;
+}
+
+.sudoku-cell-conflict .sudoku-cell-value {
+  color: #c0392b;
+}
+
+.sudoku-pencil-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  width: 100%;
+  height: 100%;
+  padding: 2px;
+  box-sizing: border-box;
+}
+
+.sudoku-pencil-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(6px, 1.8vw, 9px);
+  color: #6b6b6b;
+  line-height: 1;
+}
+
+.sudoku-pause-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: none;
+  cursor: pointer;
+}
+
+.sudoku-grid-blurred {
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+.sudoku-action-btn {
+  display: flex;
+  height: 40px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 1px solid #e2e2e2;
+  border-radius: 4px;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 600;
+  color: #344861;
+  touch-action: manipulation;
+}
+
+.sudoku-action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.sudoku-action-btn-active {
+  background-color: #89b4f7;
+  border-color: #89b4f7;
+  color: #ffffff;
+}
+
+.sudoku-num-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  border: none;
+  border-radius: 4px;
+  background-color: #f4f4f4;
+  touch-action: manipulation;
+}
+
+.sudoku-num-btn:hover:not(:disabled) {
+  background-color: #89b4f7;
+  color: #ffffff;
+}
+
+.sudoku-num-btn:hover:not(:disabled) .sudoku-num-btn-digit,
+.sudoku-num-btn:hover:not(:disabled) .sudoku-num-btn-badge {
+  color: #ffffff;
+}
+
+.sudoku-num-btn:disabled {
+  cursor: not-allowed;
+}
+
+.sudoku-num-btn-dim {
+  opacity: 0.3;
+}
+
+.sudoku-num-btn-digit {
+  font-size: 22px;
+  font-weight: 700;
+  color: #344861;
+  line-height: 1;
+}
+
+.sudoku-num-btn-badge {
+  margin-top: 2px;
+  font-size: 9px;
+  font-weight: 600;
+  color: #6b6b6b;
+  line-height: 1;
+}
+
+@keyframes sudoku-win-flash {
+  0% {
+    background-color: #6aaa64;
+    color: #ffffff;
+  }
+  100% {
+    background-color: #ffffff;
+    color: #344861;
+  }
+}
+
+.sudoku-cell-win-flash {
+  animation: sudoku-win-flash 600ms ease-out forwards;
+}
+
+.sudoku-cell-win-flash .sudoku-cell-value {
+  color: #ffffff;
+  animation: inherit;
+}
+
+@keyframes sudoku-confetti {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+.animate-sudoku-confetti {
+  animation: sudoku-confetti ease-out forwards;
+}
+
+/* Tiles */
+.tiles-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.tiles-cell {
+  aspect-ratio: 1;
+  min-height: 0;
+}
+
+.tiles-cell-empty {
+  background: transparent;
+}
+
+.tiles-tile {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 8px;
+  background: #c3a0d8;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-shadow: 0 3px 0 #9b7db0;
+  cursor: pointer;
+  transition: filter 100ms ease, transform 100ms ease, box-shadow 100ms ease,
+    background 100ms ease;
+}
+
+.tiles-tile:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.tiles-tile-selected {
+  background: #9b7db0;
+  box-shadow: 0 1px 0 #7a5f8e;
+  transform: scale(0.96);
+}
+
+.tiles-tile-clearing {
+  animation: tiles-clear 300ms ease forwards;
+  pointer-events: none;
+}
+
+.tiles-tile-shake {
+  animation: tiles-shake 400ms ease;
+}
+
+.tiles-tile-shuffle {
+  animation: tiles-shuffle-pulse 200ms ease;
+}
+
+.tiles-tile-reveal {
+  animation: tiles-reveal-flip 400ms ease;
+}
+
+@keyframes tiles-clear {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes tiles-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  16% {
+    transform: translateX(-6px);
+  }
+  33% {
+    transform: translateX(6px);
+  }
+  50% {
+    transform: translateX(-6px);
+  }
+  66% {
+    transform: translateX(6px);
+  }
+  83% {
+    transform: translateX(-6px);
+  }
+}
+
+@keyframes tiles-shuffle-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.8);
+  }
+}
+
+@keyframes tiles-reveal-flip {
+  0% {
+    transform: rotateY(0deg);
+  }
+  50% {
+    transform: rotateY(90deg);
+  }
+  100% {
+    transform: rotateY(0deg);
+  }
+}

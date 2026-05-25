@@ -1210,13 +1210,21 @@ export async function loadStrandsValidWords(): Promise<Set<string>> {
   if (validWordsCache) return validWordsCache;
   const base = new Set(FALLBACK_WORDS);
   try {
-    const res = await fetch("/valid-words.json");
-    if (res.ok) {
-      const json = (await res.json()) as string[];
-      json.forEach((w) => {
+    const [fiveLetter, spellingBee] = await Promise.all([
+      fetch("/valid-words.json").then((r) => (r.ok ? r.json() : [])),
+      fetch("/spelling-bee-by-letters.json").then((r) =>
+        r.ok ? r.json() : {}
+      ),
+    ]);
+    (fiveLetter as string[]).forEach((w) => {
+      if (w.length >= 4) base.add(w.toUpperCase());
+    });
+    const byLetters = spellingBee as Record<string, string[]>;
+    Object.values(byLetters).forEach((list) => {
+      list.forEach((w) => {
         if (w.length >= 4) base.add(w.toUpperCase());
       });
-    }
+    });
   } catch {
     // use fallback
   }

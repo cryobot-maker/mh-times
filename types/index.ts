@@ -4,7 +4,8 @@ export type GameType =
   | "spelling-bee"
   | "strands"
   | "letter-boxed"
-  | "mini";
+  | "mini"
+  | "tiles";
 
 export type PuzzleGameSlug = GameType;
 

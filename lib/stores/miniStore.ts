@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { getTodayString, loadGameState, saveGameState } from "@/lib/gameUtils";
 import { resolveMiniPuzzle, savePuzzleResult } from "@/lib/puzzleService";
+import { MINI_MAX_HINTS } from "@/lib/miniCrosswordData";
 import {
   cellKey,
   findWordAtCell,
@@ -90,6 +91,7 @@ interface PersistedMiniState {
   timerStarted: boolean;
   timerRunning: boolean;
   gameStatus: "playing" | "won";
+  hintsUsed?: number;
 }
 
 interface MiniStore {
@@ -110,8 +112,12 @@ interface MiniStore {
   stats: MiniStats;
   statsUpdated: boolean;
   initialized: boolean;
+  hintsUsed: number;
 
   init: (dateStr: string, puzzleData?: Record<string, unknown>) => void;
+  revealLetter: () => boolean;
+  revealWord: () => boolean;
+  getHintsLeft: () => number;
   selectCell: (row: number, col: number) => void;
   selectClue: (direction: MiniDirection, number: number) => void;
   setActiveTab: (tab: MiniDirection) => void;
@@ -135,6 +141,7 @@ function persist(state: {
   timerStarted: boolean;
   timerRunning: boolean;
   gameStatus: "playing" | "won";
+  hintsUsed?: number;
 }) {
   saveGameState<PersistedMiniState>(storageKey(state.puzzleDate), state);
 }
@@ -210,6 +217,7 @@ export const useMiniStore = create<MiniStore>((set, get) => ({
   stats: DEFAULT_STATS,
   statsUpdated: false,
   initialized: false,
+  hintsUsed: 0,
 
   init: (dateStr, puzzleData) => {
     const puzzle = resolveMiniPuzzle(dateStr, puzzleData);
@@ -235,6 +243,7 @@ export const useMiniStore = create<MiniStore>((set, get) => ({
         stats,
         statsUpdated: saved.gameStatus === "won",
         confetti: saved.gameStatus === "won",
+        hintsUsed: saved.hintsUsed ?? 0,
         initialized: true,
       });
       return;
@@ -255,8 +264,64 @@ export const useMiniStore = create<MiniStore>((set, get) => ({
       stats,
       statsUpdated: false,
       confetti: false,
+      hintsUsed: 0,
       initialized: true,
     });
+  },
+
+  getHintsLeft: () => MINI_MAX_HINTS - get().hintsUsed,
+
+  revealLetter: () => {
+    const state = get();
+    if (!state.parsed || state.gameStatus === "won") return false;
+    if (state.getHintsLeft() <= 0) return false;
+
+    const { focusRow, focusCol } = state;
+    if (state.parsed.black[focusRow][focusCol]) return false;
+
+    const key = cellKey(focusRow, focusCol);
+    const correct = state.parsed.solution[focusRow][focusCol];
+    if (entriesMatch(state.entries[key], correct)) return false;
+
+    const entries = { ...state.entries, [key]: correct };
+    const hintsUsed = state.hintsUsed + 1;
+
+    set({ entries, hintsUsed, timerStarted: true, timerRunning: true });
+    persist({ ...state, entries, hintsUsed, timerStarted: true, timerRunning: true });
+    checkWin(get, set);
+    return true;
+  },
+
+  revealWord: () => {
+    const state = get();
+    if (!state.parsed || state.gameStatus === "won") return false;
+    if (state.getHintsLeft() <= 0) return false;
+
+    const cells = getWordCells(
+      state.parsed,
+      state.focusRow,
+      state.focusCol,
+      state.direction
+    );
+    if (cells.length === 0) return false;
+
+    const entries = { ...state.entries };
+    let changed = false;
+    for (const { row, col } of cells) {
+      const key = cellKey(row, col);
+      const correct = state.parsed.solution[row][col];
+      if (!entriesMatch(entries[key], correct)) {
+        entries[key] = correct;
+        changed = true;
+      }
+    }
+    if (!changed) return false;
+
+    const hintsUsed = state.hintsUsed + 1;
+    set({ entries, hintsUsed, timerStarted: true, timerRunning: true });
+    persist({ ...state, entries, hintsUsed, timerStarted: true, timerRunning: true });
+    checkWin(get, set);
+    return true;
   },
 
   selectCell: (row, col) => {
@@ -446,3 +511,7 @@ export const useMiniStore = create<MiniStore>((set, get) => ({
 
   getTimerDisplay: () => formatTimer(get().elapsedSeconds),
 }));
+
+function entriesMatch(entry: string | undefined, correct: string): boolean {
+  return (entry ?? "").toUpperCase() === correct.toUpperCase();
+}

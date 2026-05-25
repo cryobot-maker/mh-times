@@ -15,6 +15,8 @@ const GAME_PATHS = [
   "/spelling-bee",
   "/mini",
   "/letter-boxed",
+  "/sudoku",
+  "/tiles",
 ];
 
 export function NavBar() {

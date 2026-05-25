@@ -108,7 +108,7 @@ interface StrandsStore {
   endDrag: () => void;
   clearPath: () => void;
   submitPath: () => void;
-  useHint: () => void;
+  applyHint: () => void;
   setShowStats: (show: boolean) => void;
   showToast: (message: string) => void;
   dismissToast: () => void;
@@ -238,7 +238,13 @@ export const useStrandsStore = create<StrandsStore>((set, get) => ({
     }
   },
 
-  endDrag: () => set({ isDragging: false }),
+  endDrag: () => {
+    const { currentPath, gameStatus } = get();
+    set({ isDragging: false });
+    if (gameStatus === "playing" && currentPath.length >= 4) {
+      get().submitPath();
+    }
+  },
 
   clearPath: () => set({ currentPath: [], isDragging: false }),
 
@@ -345,10 +351,12 @@ export const useStrandsStore = create<StrandsStore>((set, get) => ({
       return;
     }
 
-    if (
-      state.validWords?.has(upper) &&
-      isNonThemeWord(upper, state.puzzle)
-    ) {
+    const isValidBonus =
+      upper.length >= 4 &&
+      (state.validWords?.has(upper) ?? false) &&
+      isNonThemeWord(upper, state.puzzle);
+
+    if (isValidBonus) {
       const nonThemeCount = state.nonThemeCount + 1;
       set({
         nonThemeCount,
@@ -366,7 +374,7 @@ export const useStrandsStore = create<StrandsStore>((set, get) => ({
     get().clearPath();
   },
 
-  useHint: () => {
+  applyHint: () => {
     const state = get();
     if (!state.puzzle || get().getHintsAvailable() <= 0) return;
 

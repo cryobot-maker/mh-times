@@ -1,7 +1,8 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useState } from "react";
-import { BarChart2 } from "lucide-react";
+import { BarChart2, Lightbulb } from "lucide-react";
+import { useToast } from "@/components/Toast";
 import { NavBar } from "@/components/NavBar";
 import { MiniGrid } from "@/components/mini/MiniGrid";
 import { MiniHiddenInput } from "@/components/mini/MiniHiddenInput";
@@ -15,6 +16,7 @@ import { useGamePuzzle } from "@/hooks/useGamePuzzle";
 
 function MiniContent() {
   const { loading, puzzleDate, puzzleData } = useGamePuzzle("mini");
+  const showToast = useToast();
 
   const {
     initialized,
@@ -40,7 +42,12 @@ function MiniContent() {
     tickTimer,
     setShowStats,
     getTimerDisplay,
+    revealLetter,
+    revealWord,
+    getHintsLeft,
   } = useMiniStore();
+
+  const hintsLeft = getHintsLeft();
 
   const [timerDisplay, setTimerDisplay] = useState("00:00");
   const [keyboardFocusToken, setKeyboardFocusToken] = useState(0);
@@ -168,6 +175,38 @@ function MiniContent() {
           onInput={(ch) => typeLetter(ch)}
           onBackspace={backspace}
         />
+
+        {gameStatus === "playing" && (
+          <div className="mb-4 flex flex-wrap items-center justify-center gap-2">
+            <span className="text-xs text-[#6b6b6b]">
+              Hints: {hintsLeft} left
+            </span>
+            <button
+              type="button"
+              disabled={hintsLeft <= 0}
+              onClick={() => {
+                if (revealLetter()) showToast("Letter revealed");
+                else showToast("Nothing to reveal here");
+              }}
+              className="flex items-center gap-1.5 rounded-full border border-[#e2e2e2] px-3 py-1.5 text-xs font-semibold text-[#121212] hover:bg-[#f4f3ee] disabled:opacity-40"
+            >
+              <Lightbulb size={14} />
+              Reveal letter
+            </button>
+            <button
+              type="button"
+              disabled={hintsLeft <= 0}
+              onClick={() => {
+                if (revealWord()) showToast("Word revealed");
+                else showToast("Word already complete");
+              }}
+              className="flex items-center gap-1.5 rounded-full border border-[#e2e2e2] px-3 py-1.5 text-xs font-semibold text-[#121212] hover:bg-[#f4f3ee] disabled:opacity-40"
+            >
+              <Lightbulb size={14} />
+              Reveal word
+            </button>
+          </div>
+        )}
 
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:gap-10">
           <div className="w-full shrink-0 md:w-[280px]">
